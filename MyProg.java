@@ -287,13 +287,15 @@ public class MyProg
         return (jumpptr+moveptr);
     }
 
+    
     /* Employ your favorite search to find the best move.  This code is an example     */
     /* of an alpha/beta search, except I have not provided the MinVal,MaxVal,EVAL      */
     /* functions.  This example code shows you how to call the FindLegalMoves function */
     /* and the PerformMove function */
     void FindBestMove(int player)
     {
-        int i; //,alpha=-1000,beta=1000,minval[48];
+        int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
+        double alpha = Double.MIN_VALUE, beta= Doulb.MAX_VALUE;
         State state = new State(); //, nextstate;
 
         /* Set up the current state */
@@ -303,24 +305,37 @@ public class MyProg
 
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
-
-        /*
-        for(i=0; i<state.moveptr; i++) {
+        myBestMoveIndex= random.nextInt(state.moveptr);
+    
+        for(int x=0; x<state.moveptr; x++) {
             // Set up the next state by copying the current state and then updating
             // the new state to reflect the new board after performing the move.
+            double rVal;
+            State nextState= new State();
+            nextState.player= player;
+            memcpy(nextState.board,board);
+            PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
 
+            //rVal = MinVal(nextState.board,alpha,beta);
+
+            // if(rVal>alpha){
+            //     alpha=rVal;
+            //     myBestMoveIndex=x;
+            // }
+
+            
             // Call your search routine to determine the value of this move.  Note:
             // if you choose to use alpha/beta search you will need to write the
             // MinVal and MaxVal functions, as well as your heuristic eval
             // function.
         }    
-        */
+        
 
         // For now, until you write your search routine, we will just set the best move
         // to be a random legal one, so that it plays a legal game of checkers.
         //i = rand()%state.moveptr;
-        i = random.nextInt(state.moveptr);
-        memcpy(bestmove,state.movelist[i],MoveLength(state.movelist[i]));
+      
+        memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
     }
 
     /* Converts a square label to it's x,y position */
