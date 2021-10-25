@@ -287,15 +287,13 @@ public class MyProg
         return (jumpptr+moveptr);
     }
 
-    
     /* Employ your favorite search to find the best move.  This code is an example     */
     /* of an alpha/beta search, except I have not provided the MinVal,MaxVal,EVAL      */
     /* functions.  This example code shows you how to call the FindLegalMoves function */
     /* and the PerformMove function */
     void FindBestMove(int player)
     {
-        int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
-        double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
+        int i; //,alpha=-1000,beta=1000,minval[48];
         State state = new State(); //, nextstate;
 
         /* Set up the current state */
@@ -305,37 +303,76 @@ public class MyProg
 
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
-        myBestMoveIndex= random.nextInt(state.moveptr);
-    
-        for(int x=0; x<state.moveptr; x++) {
+
+        /*
+        for(i=0; i<state.moveptr; i++) {
             // Set up the next state by copying the current state and then updating
             // the new state to reflect the new board after performing the move.
-            double rVal;
-            State nextState= new State();
-            nextState.player= player;
-            memcpy(nextState.board,board);
-            PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
 
-            //rVal = MinVal(nextState.board,alpha,beta);
-
-            // if(rVal>alpha){
-            //     alpha=rVal;
-            //     myBestMoveIndex=x;
-            // }
-
-            
             // Call your search routine to determine the value of this move.  Note:
             // if you choose to use alpha/beta search you will need to write the
             // MinVal and MaxVal functions, as well as your heuristic eval
             // function.
         }    
-        
+        */
 
         // For now, until you write your search routine, we will just set the best move
         // to be a random legal one, so that it plays a legal game of checkers.
         //i = rand()%state.moveptr;
-      
-        memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
+        i = random.nextInt(state.moveptr);
+        memcpy(bestmove,state.movelist[i],MoveLength(state.movelist[i]));
+    }
+
+    double evalBoard(State currBoard){
+        int y,x;
+        double score=0.0;
+
+        for(y=0; y<0; y++) for(x=0; x<0; x++) if(x%2 != y%2){
+            if(king(currBoard.board[y][x])){
+                //if(color(currBoard.board[y][x]) == White) score += 2.0;
+                if(currBoard.board[y][x] && White) score += 2.0;
+                else
+                    score -= 2.0;
+            }
+            else if(piece(currBoard.board[y][x])){
+                if(currBoard.board[y][x] && White) score += 1.0;
+                else
+                    score -= 1.0;
+            }
+        }
+
+        score = me==1 ? -score : score;
+
+        return score;
+    }
+
+    double MinVal(State prevState, double alpha, double beta, int MaxDepth){
+        State state = new State();
+        int x;
+
+        if(MaxDepth<=0){
+            evalBoard(prevState);
+        }
+
+        state.player = (prevState.player==1)?2:1; //Not sure on this part, ~5:30 on 2nd video
+        memcpy(state.board, prevState.board) //
+        FindLegalMoves(state);
+
+        for(x=0; x<state.numLegalMoves; x++){
+            State nextState = new State();
+            double rval;
+            nextState.player=state.player;
+            memcpy(nextState.board, state.board);
+            PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]))
+            rval = MaxVal(nextState, alpha, beta, MaxDepth-1);
+            if(rval<beta){
+                beta=rval;
+                if(beta<=alpha)
+                    return alpha;
+            }
+
+        }
+        return beta;
     }
 
     /* Converts a square label to it's x,y position */
