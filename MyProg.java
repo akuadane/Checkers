@@ -295,7 +295,7 @@ public class MyProg
     void FindBestMove(int player)
     {
         int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
-        double alpha = Double.MIN_VALUE, beta= Doulb.MAX_VALUE;
+        double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
         State state = new State(); //, nextstate;
 
         /* Set up the current state */
