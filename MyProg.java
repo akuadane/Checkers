@@ -293,7 +293,9 @@ public class MyProg
     /* and the PerformMove function */
     void FindBestMove(int player)
     {
-        int i; //,alpha=-1000,beta=1000,minval[48];
+      
+        int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
+        double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
         State state = new State(); //, nextstate;
 
         /* Set up the current state */
@@ -303,68 +305,87 @@ public class MyProg
 
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
+        myBestMoveIndex= random.nextInt(state.moveptr);
 
-        /*
-        for(i=0; i<state.moveptr; i++) {
+        for(int x=0; x<state.moveptr; x++) {
             // Set up the next state by copying the current state and then updating
             // the new state to reflect the new board after performing the move.
+            double rVal;
+            State nextState= new State();
+            nextState.player= player;
+            memcpy(nextState.board,board);
+            PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+
+       
+            rVal = MinVal(nextState,alpha,beta,MaxDepth);
+
+            if(rVal>alpha){
+                alpha=rVal;
+                myBestMoveIndex=x;
+            }
+
 
             // Call your search routine to determine the value of this move.  Note:
             // if you choose to use alpha/beta search you will need to write the
             // MinVal and MaxVal functions, as well as your heuristic eval
             // function.
         }    
-        */
+
 
         // For now, until you write your search routine, we will just set the best move
         // to be a random legal one, so that it plays a legal game of checkers.
         //i = rand()%state.moveptr;
-        i = random.nextInt(state.moveptr);
-        memcpy(bestmove,state.movelist[i],MoveLength(state.movelist[i]));
+
+        memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
     }
 
-    double evalBoard(State currBoard){
+    double evalBoard(State currBoard){ 
         int y,x;
         double score=0.0;
-
-        for(y=0; y<0; y++) for(x=0; x<0; x++) if(x%2 != y%2){
-            if(king(currBoard.board[y][x])){
-                //if(color(currBoard.board[y][x]) == White) score += 2.0;
-                if(currBoard.board[y][x] && White) score += 2.0;
-                else
-                    score -= 2.0;
-            }
-            else if(piece(currBoard.board[y][x])){
-                if(currBoard.board[y][x] && White) score += 1.0;
-                else
-                    score -= 1.0;
-            }
+        for(y=0; y<8; y++) {
+            for(x=0; x<8; x++){
+                if(x%2 != y%2){
+                    if(KING(currBoard.board[y][x])){
+                        //if(color(currBoard.board[y][x]) == White) score += 2.0;
+                        if(color(currBoard.board[y][x]) == White) score += 2.0;
+                        else
+                            score -= 2.0;
+                    }
+                    else if(piece(currBoard.board[y][x])){
+                        if(color(currBoard.board[y][x]) == White) score += 1.0;
+                        else
+                            score -= 1.0;
+                    }
+                }
+            } 
+    
         }
-
         score = me==1 ? -score : score;
 
         return score;
     }
 
-    double MinVal(State prevState, double alpha, double beta, int MaxDepth){
+    double MinVal(State prevState, double alpha, double beta, int localMaxDepth){
         State state = new State();
         int x;
-
-        if(MaxDepth<=0){
-            evalBoard(prevState);
+       
+        
+        if(localMaxDepth<=0){
+           
+            return evalBoard(prevState);
         }
 
-        state.player = (prevState.player==1)?2:1; //Not sure on this part, ~5:30 on 2nd video
-        memcpy(state.board, prevState.board) //
+        state.player = (prevState.player==1)?2:1;
+        memcpy(state.board, prevState.board); 
         FindLegalMoves(state);
 
-        for(x=0; x<state.numLegalMoves; x++){
+        for(x=0; x<state.moveptr; x++){
             State nextState = new State();
             double rval;
             nextState.player=state.player;
             memcpy(nextState.board, state.board);
-            PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]))
-            rval = MaxVal(nextState, alpha, beta, MaxDepth-1);
+            PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
+            rval = MaxVal(nextState, alpha, beta, localMaxDepth-1);
             if(rval<beta){
                 beta=rval;
                 if(beta<=alpha)
@@ -373,6 +394,37 @@ public class MyProg
 
         }
         return beta;
+    }
+
+
+    double MaxVal(State prevState, double alpha, double beta, int localMaxDepth){
+        State state = new State();
+        int x;
+
+        if(localMaxDepth<=0){
+           
+            return evalBoard(prevState);
+        }
+
+        state.player = (prevState.player==1)?2:1; //Not sure on this part, ~5:30 on 2nd video
+        memcpy(state.board, prevState.board); //
+        FindLegalMoves(state);
+
+        for(x=0; x<state.moveptr; x++){
+            State nextState = new State();
+            double rval;
+            nextState.player=state.player;
+            memcpy(nextState.board, state.board);
+            PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
+            rval = MinVal(nextState, alpha, beta, localMaxDepth-1);
+            if(rval>alpha){
+                alpha=rval;
+                if(alpha>=beta)
+                    return beta;
+            }
+
+        }
+        return alpha;
     }
 
     /* Converts a square label to it's x,y position */
