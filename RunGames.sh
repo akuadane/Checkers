@@ -2,34 +2,38 @@
 make clean &> /dev/null
 make &> /dev/null
 
-#pipe all output to temp file
-./checkers "java MyProg" computer 5 &> test
+Wins=0
+Games=10
 
-P1Wins=0
-P2Wins=0
-#could add for loop, 
-#then increment wins and output W/L ratio.
+#Run games through loop. then increment wins
+for ((i=1; i<=Games; i++))
+do
 
-tanner=$(tail -1 test)
+	#pipe all output to temp file, and suppress terminal output.
+	./checkers "java MyProg" computer 5 &> test
+
+	# grab who won
+	t=$(tail -1 test | awk '{print $2}')
+
+	if test "$t" = 2
+	then
+		Wins=$[Wins+1]
+	fi
+
+	rm test
+done
+
+#output W/L ratio.
+echo "MyProg won " $Wins " games out of " $Games " versus Computer"
+
+
+#commented code below for inspiration
+
+#tanner=$(tail -1 test)
 
 #echo "test output:" $tanner
-
 #echo "test hawk: " 
-
 #tail -1 test | awk '{print $1, $2}'
-
-t=$(tail -1 test | awk '{print $2}')
-
-if test "$t" = 1
-then
-	echo " player one has lost"
-elif test "$t" = 2
-then		
-	echo " player two has lost"
-fi
-
-rm test
-
 #num=0
 #total=0
 	#num=$[num+10]
@@ -37,6 +41,7 @@ rm test
 	#tanner=$(java RandomTest $num | awk '{print $1;}' )
 		
 	#if test "$tanner" = "PASS"
+	
 	#then
 	#	total=$[total+1]
 	#fi
@@ -44,3 +49,5 @@ rm test
 #echo "For numRandoms =" $num "     pass rate = " $total 
 
 #rm *.class
+
+#elif test "$t" = 2
