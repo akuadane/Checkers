@@ -10,8 +10,10 @@ for ((i=1; i<=Games; i++))
 do
 
 	#pipe all output to temp file, and suppress terminal output.
-	./checkers "java MyProg" computer 5 &> test
-
+	#timeout 5 ./checkers computer "java MyProg" 5 &> test
+	#timeout 5 ./checkers foo computer 3 -MaxDepth 3 &> test
+	timeout 10 ./checkers "java MyProg" computer 3 -MaxDepth 5 &> test
+	
 	# grab who won
 	t=$(tail -1 test | awk '{print $2}')
 
