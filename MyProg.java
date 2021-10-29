@@ -2,6 +2,7 @@ import java.util.*;
 import java.io.*;
 
 
+
 class State 
 {
     int player;
@@ -287,56 +288,98 @@ public class MyProg
         return (jumpptr+moveptr);
     }
 
+   
+
     /* Employ your favorite search to find the best move.  This code is an example     */
     /* of an alpha/beta search, except I have not provided the MinVal,MaxVal,EVAL      */
     /* functions.  This example code shows you how to call the FindLegalMoves function */
     /* and the PerformMove function */
     void FindBestMove(int player)
     {
-      
-        int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
-        double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
+     
+        long start = System.currentTimeMillis();
+        long end = (long) (start + SecPerMove*1000);
+            
         State state = new State(); //, nextstate;
+        State nextState= new  State();
 
-        /* Set up the current state */
-        state.player = player;
-        memcpy(state.board,board);
-        memset(bestmove,0,12);
+        
+        
+        Thread job = new Thread(){
+            @Override
+            public void run() {
+                
+                int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
+                double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
+                
+        
+                /* Set up the current state */
+                state.player = player;
+                memcpy(state.board,board);
+                memset(bestmove,0,12);
+        
+                /* Find the legal moves for the current state */
+                FindLegalMoves(state);
+                myBestMoveIndex= random.nextInt(state.moveptr);
+                    while (!Thread.interrupted()){
+                        
+                            for(int x=0; x<state.moveptr; x++) {
+                                // Set up the next state by copying the current state and then updating
+                                // the new state to reflect the new board after performing the move.
+                                double rVal;
+                                
+                                nextState.player= player;
+                                nextState.board= new char[8][8];
+                                nextState.movelist= new char[48][12];
+                                nextState.moveptr=0;
 
-        /* Find the legal moves for the current state */
-        FindLegalMoves(state);
-        myBestMoveIndex= random.nextInt(state.moveptr);
+                                memcpy(nextState.board,board);
+                                PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+                    
+                           
+                                rVal = MinVal(nextState,alpha,beta,MaxDepth);
+                    
+                                if(rVal>alpha){
+                                    alpha=rVal;
+                                    myBestMoveIndex=x;
+                                }
+                    
+                    
+                                // Call your search routine to determine the value of this move.  Note:
+                                // if you choose to use alpha/beta search you will need to write the
+                                // MinVal and MaxVal functions, as well as your heuristic eval
+                                // function.
+                            } 
+                        
+                        break;
+                    
+                       
+                    }
+                    memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
+                
+            }
+        };
 
-        for(int x=0; x<state.moveptr; x++) {
-            // Set up the next state by copying the current state and then updating
-            // the new state to reflect the new board after performing the move.
-            double rVal;
-            State nextState= new State();
-            nextState.player= player;
-            memcpy(nextState.board,board);
-            PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+        job.start();
+
+        while(job.isAlive() && System.currentTimeMillis()<end){}
+
+        job.interrupt();
+        try{
+            Thread.sleep(10);
+        }
+       catch(InterruptedException e) {}
+        job.stop();
+        
 
        
-            rVal = MinVal(nextState,alpha,beta,MaxDepth);
-
-            if(rVal>alpha){
-                alpha=rVal;
-                myBestMoveIndex=x;
-            }
-
-
-            // Call your search routine to determine the value of this move.  Note:
-            // if you choose to use alpha/beta search you will need to write the
-            // MinVal and MaxVal functions, as well as your heuristic eval
-            // function.
-        }    
-
 
         // For now, until you write your search routine, we will just set the best move
         // to be a random legal one, so that it plays a legal game of checkers.
         //i = rand()%state.moveptr;
 
-        memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
+       
+     
     }
 
     double evalBoard(State currBoard){ 
@@ -591,7 +634,7 @@ System.err.println("Java wRead " + rval);
 
         /* Convert command line parameters */
         SecPerMove = (float)(Double.parseDouble(argv[0]));
-        MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : -1;
+        MaxDepth = (argv.length == 3) ? Integer.parseInt(argv[2]) : 5;
 
         System.err.println("Java maximum search depth = " + MaxDepth);
 
