@@ -4,7 +4,7 @@ make &> /dev/null
 javac MyProg.java
 
 Wins=0
-Games=10
+Games=50
 Losses=0
 #Run games through loop. then increment wins
 for ((i=1; i<=Games; i++))
@@ -13,7 +13,7 @@ do
 	#pipe all output to temp file, and suppress terminal output.
 	#timeout 5 ./checkers computer "java MyProg" 5 &> test
 	#timeout 5 ./checkers foo computer 3 -MaxDepth 3 &> test
-	timeout 10 ./checkers "java MyProg" computer 3 -MaxDepth 5 &> test
+	timeout 20 ./checkers "java MyProg" computer 3 -MaxDepth 5 &> test
 	
 	# grab who won
 	t=$(tail -1 test | awk '{print $2}')
@@ -31,29 +31,6 @@ do
 done
 
 #output W/L ratio.
-echo "MyProg won " $Wins " and lost: " $Losses " out of " $Games "  versus Computer"
+echo "MyProg won " $Wins " and lost " $Losses " out of " $Games "  versus Computer"
 
 
-#commented code below for inspiration
-
-#tanner=$(tail -1 test)
-
-#echo "test output:" $tanner
-#echo "test hawk: " 
-#tail -1 test | awk '{print $1, $2}'
-#num=0
-#total=0
-	#num=$[num+10]
-
-	#tanner=$(java RandomTest $num | awk '{print $1;}' )
-		
-	#if test "$tanner" = "PASS"
-	
-	#then
-	#	total=$[total+1]
-	#fi
-
-#echo "For numRandoms =" $num "     pass rate = " $total 
-#rm *.class
-
-#elif test "$t" = 2
