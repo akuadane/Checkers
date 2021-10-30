@@ -317,7 +317,7 @@ public class MyProg
             PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
 
        
-            rVal = MinVal(nextState,alpha,beta,MaxDepth);
+            rVal = MaxVal(nextState,alpha,beta,MaxDepth);
 
             if(rVal>alpha){
                 alpha=rVal;
@@ -345,6 +345,7 @@ public class MyProg
         for(y=0; y<8; y++) {
             for(x=0; x<8; x++){
                 if(x%2 != y%2){
+                    
                     if(KING(currBoard.board[y][x])){
                         //if(color(currBoard.board[y][x]) == White) score += 2.0;
                         if(color(currBoard.board[y][x]) == White) score += 2.0;
@@ -354,7 +355,7 @@ public class MyProg
                     else if(piece(currBoard.board[y][x])){
                         if(color(currBoard.board[y][x]) == White) score += 1.0;
                         else
-                            score -= 1.0;
+                           score -= 1.0;
                     }
                 }
             } 
@@ -369,7 +370,7 @@ public class MyProg
         State state = new State();
         int x;
        
-        
+        //System.err.println("Tanner local max depth inside a MinVal: " + localMaxDepth);
         if(localMaxDepth<=0){
            
             return evalBoard(prevState);
@@ -400,7 +401,7 @@ public class MyProg
     double MaxVal(State prevState, double alpha, double beta, int localMaxDepth){
         State state = new State();
         int x;
-
+        //System.err.println("depth inside MAXVal: " + localMaxDepth);
         if(localMaxDepth<=0){
            
             return evalBoard(prevState);
@@ -591,8 +592,11 @@ System.err.println("Java wRead " + rval);
 
         /* Convert command line parameters */
         SecPerMove = (float)(Double.parseDouble(argv[0]));
-        MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : -1;
+        MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 5;
 
+
+
+        System.err.println("Tanner MAx depth : " + MaxDepth);
         System.err.println("Java maximum search depth = " + MaxDepth);
 
         /* Determine if I am player 1 (red) or player 2 (white) */
@@ -600,7 +604,7 @@ System.err.println("Java wRead " + rval);
         buf = myRead(br, 7);
         if(buf.startsWith("Player1")) 
         {
-           System.err.println("Java is player 1");
+           System.err.println("Java is player 1. Tanner");
            player1=1;
         }
         else 

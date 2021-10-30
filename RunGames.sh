@@ -1,10 +1,11 @@
 #make and suppress all warnings
 make clean &> /dev/null
 make &> /dev/null
+javac MyProg.java
 
 Wins=0
 Games=10
-
+Losses=0
 #Run games through loop. then increment wins
 for ((i=1; i<=Games; i++))
 do
@@ -20,13 +21,17 @@ do
 	if test "$t" = 2
 	then
 		Wins=$[Wins+1]
+	elif test "$t" = 1
+	then
+		Losses=$[Losses+1]
+
 	fi
 
 	rm test
 done
 
 #output W/L ratio.
-echo "MyProg won " $Wins " games out of " $Games " versus Computer"
+echo "MyProg won " $Wins " and lost: " $Losses " out of " $Games "  versus Computer"
 
 
 #commented code below for inspiration
@@ -49,7 +54,6 @@ echo "MyProg won " $Wins " games out of " $Games " versus Computer"
 	#fi
 
 #echo "For numRandoms =" $num "     pass rate = " $total 
-
 #rm *.class
 
 #elif test "$t" = 2
