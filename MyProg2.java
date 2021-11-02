@@ -327,7 +327,7 @@ public class MyProg
                                 // Set up the next state by copying the current state and then updating
                                 // the new state to reflect the new board after performing the move.
                                 double rVal;
-                               
+                                
                                 nextState.player= player;
                                 nextState.board= new char[8][8];
                                 nextState.movelist= new char[48][12];
@@ -338,10 +338,9 @@ public class MyProg
                     
                            
                                 rVal = MinVal(nextState,alpha,beta,MaxDepth);
-                                
+                    
                                 if(rVal>alpha){
                                     alpha=rVal;
-                                    System.err.println("Best move changed from : "+myBestMoveIndex+" to "+x+"=====================================================");
                                     myBestMoveIndex=x;
                                 }
                     
@@ -392,7 +391,8 @@ public class MyProg
                     if(KING(currBoard.board[y][x])){
                         //if(color(currBoard.board[y][x]) == White) score += 2.0;
                         if(color(currBoard.board[y][x]) == White) score += 2.0;
-                        else score -= 2.0;
+                        else
+                            score -= 2.0;
                     }
                     else if(piece(currBoard.board[y][x])){
                         if(color(currBoard.board[y][x]) == White) score += 1.0;
@@ -404,7 +404,7 @@ public class MyProg
     
         }
         score = me==1 ? -score : score;
-        
+
         return score;
     }
 
@@ -594,7 +594,7 @@ public class MyProg
         String rval = "";
         char line[] = new char[1000];
         int x,len=0;
-//System.err.println("Java waiting for input");
+System.err.println("Java waiting for input");
         try
         {
            //while(!br.ready()) ;
@@ -612,7 +612,7 @@ System.err.println("Java read " + len + " chars: " + rval);
         String rval = "";
         char line[] = new char[1000];
         int x,len=0;
-//System.err.println("Java waiting for input");
+System.err.println("Java waiting for input");
         try
         {
            //while(!br.ready()) ;
@@ -634,7 +634,7 @@ System.err.println("Java wRead " + rval);
 
         /* Convert command line parameters */
         SecPerMove = (float)(Double.parseDouble(argv[0]));
-        MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 5;
+        MaxDepth = (argv.length == 3) ? Integer.parseInt(argv[2]) : 5;
 
         System.err.println("Java maximum search depth = " + MaxDepth);
 

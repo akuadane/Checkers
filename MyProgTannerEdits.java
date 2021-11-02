@@ -2,7 +2,6 @@ import java.util.*;
 import java.io.*;
 
 
-
 class State 
 {
     int player;
@@ -52,6 +51,8 @@ public class MyProg
     /*** For the move list ***/
     int moveptr = 0;
     int movelist[][] = new int[48][12];
+
+    int totalPieces =24;
 
     Random random = new Random();
 
@@ -288,121 +289,101 @@ public class MyProg
         return (jumpptr+moveptr);
     }
 
-   
-
     /* Employ your favorite search to find the best move.  This code is an example     */
     /* of an alpha/beta search, except I have not provided the MinVal,MaxVal,EVAL      */
     /* functions.  This example code shows you how to call the FindLegalMoves function */
     /* and the PerformMove function */
     void FindBestMove(int player)
     {
-     
-        long start = System.currentTimeMillis();
-        long end = (long) (start + SecPerMove*1000);
-            
+      
+        int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
+        double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
         State state = new State(); //, nextstate;
-        State nextState= new  State();
 
-        
-        
-        Thread job = new Thread(){
-            @Override
-            public void run() {
-                
-                int myBestMoveIndex; //,alpha=-1000,beta=1000,minval[48];
-                double alpha = Double.MIN_VALUE, beta= Double.MAX_VALUE;
-                
-        
-                /* Set up the current state */
-                state.player = player;
-                memcpy(state.board,board);
-                memset(bestmove,0,12);
-        
-                /* Find the legal moves for the current state */
-                FindLegalMoves(state);
-                myBestMoveIndex= random.nextInt(state.moveptr);
-                    while (!Thread.interrupted()){
-                        
-                            for(int x=0; x<state.moveptr; x++) {
-                                // Set up the next state by copying the current state and then updating
-                                // the new state to reflect the new board after performing the move.
-                                double rVal;
-                               
-                                nextState.player= player;
-                                nextState.board= new char[8][8];
-                                nextState.movelist= new char[48][12];
-                                nextState.moveptr=0;
+        /* Set up the current state */
+        state.player = player;
+        memcpy(state.board,board);
+        memset(bestmove,0,12);
 
-                                memcpy(nextState.board,board);
-                                PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
-                    
-                           
-                                rVal = MinVal(nextState,alpha,beta,MaxDepth);
-                                
-                                if(rVal>alpha){
-                                    alpha=rVal;
-                                    System.err.println("Best move changed from : "+myBestMoveIndex+" to "+x+"=====================================================");
-                                    myBestMoveIndex=x;
-                                }
-                    
-                    
-                                // Call your search routine to determine the value of this move.  Note:
-                                // if you choose to use alpha/beta search you will need to write the
-                                // MinVal and MaxVal functions, as well as your heuristic eval
-                                // function.
-                            } 
-                        
-                        break;
-                    
-                       
-                    }
-                    memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
-                
-            }
-        };
+        /* Find the legal moves for the current state */
+        FindLegalMoves(state);
+        myBestMoveIndex= random.nextInt(state.moveptr);
 
-        job.start();
-
-        while(job.isAlive() && System.currentTimeMillis()<end){}
-
-        job.interrupt();
-        try{
-            Thread.sleep(10);
-        }
-       catch(InterruptedException e) {}
-        job.stop();
-        
+        for(int x=0; x<state.moveptr; x++) {
+            // Set up the next state by copying the current state and then updating
+            // the new state to reflect the new board after performing the move.
+            double rVal;
+            State nextState= new State();
+            nextState.player= player;
+            memcpy(nextState.board,board);
+            PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
 
        
+            rVal = MaxVal(nextState,alpha,beta,MaxDepth);
+
+            if(rVal>alpha){
+                alpha=rVal;
+                myBestMoveIndex=x;
+            }
+
+
+            // Call your search routine to determine the value of this move.  Note:
+            // if you choose to use alpha/beta search you will need to write the
+            // MinVal and MaxVal functions, as well as your heuristic eval
+            // function.
+        }    
+
 
         // For now, until you write your search routine, we will just set the best move
         // to be a random legal one, so that it plays a legal game of checkers.
         //i = rand()%state.moveptr;
 
-       
-     
+        memcpy(bestmove,state.movelist[myBestMoveIndex],MoveLength(state.movelist[myBestMoveIndex]));
     }
 
     double evalBoard(State currBoard){ 
         int y,x;
         double score=0.0;
+        // double meScore =0.0;
+        // double oppScore = 0.0;
+        //trying a ratio heuristic.
+        // only use ratio heuristic if end game. Like total pieces <10. 
         for(y=0; y<8; y++) {
             for(x=0; x<8; x++){
                 if(x%2 != y%2){
+                    
                     if(KING(currBoard.board[y][x])){
                         //if(color(currBoard.board[y][x]) == White) score += 2.0;
-                        if(color(currBoard.board[y][x]) == White) score += 2.0;
-                        else score -= 2.0;
+                        if(color(currBoard.board[y][x]) == White){
+                            // meScore += 4.0;
+                            score+=2.0;
+                        }
+                        else
+                            score-=2.0;
+                            // oppScore += 4.0;
                     }
                     else if(piece(currBoard.board[y][x])){
-                        if(color(currBoard.board[y][x]) == White) score += 1.0;
-                        else
-                            score -= 1.0;
+                        if(color(currBoard.board[y][x]) == White) {
+                            score +=1.0;
+                            // meScore += 1.0;
+                            // if( y == 0){ // home row extra 1 point. is this right or backwards? -- should work, since if wrong, then that's a king. 
+                            //     meScore +=1.0;
+                            // }
+                        }
+                        else{
+                            score-=1.0;
+                            // oppScore += 1.0;
+                            // if(y==7){
+                            //     oppScore +=1.0;
+                            // }
+                        }
                     }
                 }
             } 
     
         }
+        // score = meScore / oppScore;
+        // score = me==1 ? 1/score : score;
         score = me==1 ? -score : score;
         
         return score;
@@ -412,7 +393,7 @@ public class MyProg
         State state = new State();
         int x;
        
-        
+        //System.err.println("Tanner local max depth inside a MinVal: " + localMaxDepth);
         if(localMaxDepth<=0){
            
             return evalBoard(prevState);
@@ -428,7 +409,7 @@ public class MyProg
             nextState.player=state.player;
             memcpy(nextState.board, state.board);
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
-            rval = MaxVal(nextState, alpha, beta, localMaxDepth-1);
+            rval = MinVal(nextState, alpha, beta, localMaxDepth-1);
             if(rval<beta){
                 beta=rval;
                 if(beta<=alpha)
@@ -443,7 +424,7 @@ public class MyProg
     double MaxVal(State prevState, double alpha, double beta, int localMaxDepth){
         State state = new State();
         int x;
-
+        //System.err.println("depth inside MAXVal: " + localMaxDepth);
         if(localMaxDepth<=0){
            
             return evalBoard(prevState);
@@ -594,7 +575,7 @@ public class MyProg
         String rval = "";
         char line[] = new char[1000];
         int x,len=0;
-//System.err.println("Java waiting for input");
+       // System.err.println("Java waiting for input");
         try
         {
            //while(!br.ready()) ;
@@ -602,7 +583,7 @@ public class MyProg
         }
         catch(Exception e) { System.err.println("Java wio exception"); }
         for(x=0;x<len;x++) rval += line[x];
-System.err.println("Java read " + len + " chars: " + rval);
+        System.err.println("Java read " + len + " chars: " + rval);
         return rval;
     }
 
@@ -612,7 +593,7 @@ System.err.println("Java read " + len + " chars: " + rval);
         String rval = "";
         char line[] = new char[1000];
         int x,len=0;
-//System.err.println("Java waiting for input");
+        //System.err.println("Java waiting for input");
         try
         {
            //while(!br.ready()) ;
@@ -620,8 +601,23 @@ System.err.println("Java read " + len + " chars: " + rval);
         }
         catch(Exception e) { System.err.println("Java wio exception"); }
         for(x=0;x<len;x++) rval += line[x];
-System.err.println("Java wRead " + rval);
+        System.err.println("Java wRead " + rval);
         return rval;
+    }
+    public int countPieces(char[][] curBoard){
+        int pieces =0;
+        for(int y=0; y<8; y++) {
+            for(int x=0; x<8; x++){
+                if(x%2 != y%2){
+                    
+                    if(KING(curBoard[y][x]) | piece(curBoard[y][x])){
+                        pieces += 1;
+
+                    }
+                }
+            }
+        }
+        return pieces;
     }
 
     public void play(String argv[]) throws Exception
@@ -636,6 +632,9 @@ System.err.println("Java wRead " + rval);
         SecPerMove = (float)(Double.parseDouble(argv[0]));
         MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 5;
 
+
+
+        //System.err.println("Tanner MAx depth : " + MaxDepth);
         System.err.println("Java maximum search depth = " + MaxDepth);
 
         /* Determine if I am player 1 (red) or player 2 (white) */
@@ -643,7 +642,7 @@ System.err.println("Java wRead " + rval);
         buf = myRead(br, 7);
         if(buf.startsWith("Player1")) 
         {
-           System.err.println("Java is player 1");
+           System.err.println("Java is player 1. ");
            player1=1;
         }
         else 
@@ -651,26 +650,60 @@ System.err.println("Java wRead " + rval);
            System.err.println("Java is player 2");
            player1=0;
         }
-        if(player1!=0) me = 1; else me = 2;
+        if(player1==1) me = 1; else me = 2;
 
         /* Set up the board */ 
         ResetBoard();
 
-        if (player1!=0) 
-        {
+       if (player1==1) 
+       {
             /* Find my move, update board, and write move to pipe */
-            if(player1!=0) FindBestMove(1); else FindBestMove(2);
+            // if(player1!=0){ 
+                FindBestMove(1);
+            // }
+            // else {
+            //      FindBestMove(2);
+            // }
             if(bestmove[0] != 0) { /* There is a legal move */
                 mlen = MoveLength(bestmove);
                 PerformMove(board,bestmove,mlen);
+
                 buf = MoveToText(bestmove);
             }
-            else System.exit(1); /* No legal moves available, so I have lost */
+            else {
+                System.exit(1);
+            } /* No legal moves available, so I have lost */
 
             /* Write the move to the pipe */
             System.err.println("Java making first move: " + buf);
             System.out.println(buf);
-        }
+       }
+       
+       else{ // we are player 2. so wait for computer move, then move. 
+            buf=myRead(br);
+                
+            memset(move,0,12);
+
+            /* Update the board to reflect opponents move */
+            mlen = TextToMove(buf,move);
+            PerformMove(board,move,mlen);
+             FindBestMove(2);
+            if(bestmove[0] != 0) { /* There is a legal move */
+                mlen = MoveLength(bestmove);
+                PerformMove(board,bestmove,mlen);
+                buf = MoveToText(bestmove);
+                //totalPieces = countPieces(board);
+                System.err.println("Tanner is here");
+                System.err.println("total pieces:" + totalPieces);
+            }
+            else System.exit(1); /* No legal moves available, so I have lost */
+
+            /* Write the move to the pipe */
+            
+            System.err.println("Java moving second: " + buf);
+            System.out.println(buf);
+       }
+  
 
         for(;;) 
         {
@@ -683,13 +716,16 @@ System.err.println("Java wRead " + rval);
             /* Update the board to reflect opponents move */
             mlen = TextToMove(buf,move);
             PerformMove(board,move,mlen);
-            
+            //totalPieces = countPieces(board);
+            //System.err.println("total pieces:" + totalPieces);
             /* Find my move, update board, and write move to pipe */
             if(player1!=0) FindBestMove(1); else FindBestMove(2);
             if(bestmove[0] != 0) { /* There is a legal move */
                 mlen = MoveLength(bestmove);
                 PerformMove(board,bestmove,mlen);
                 buf = MoveToText(bestmove);
+                //totalPieces = countPieces(board);
+                //System.err.println("total pieces:" + totalPieces);
             }
             else System.exit(1); /* No legal moves available, so I have lost */
 
