@@ -4,8 +4,9 @@ make &> /dev/null
 javac MyProg.java
 
 Wins=0
-Games=30
 Losses=0
+Games=100
+
 #Run games through loop. then increment wins
 for ((i=1; i<=Games; i++))
 do
@@ -13,7 +14,7 @@ do
 	#pipe all output to temp file, and suppress terminal output.
 	#timeout 5 ./checkers computer "java MyProg" 5 &> test
 	#timeout 5 ./checkers foo computer 3 -MaxDepth 3 &> test
-	./checkers "java MyProg" computer 6 -MaxDepth 3 &> test
+	timeout 10 ./checkers "java MyProg" computer 3 -MaxDepth 5 &> test
 	
 	
 	# grab who won

@@ -58,8 +58,8 @@ void PrintBoard()
 {
     int board[8][8];
     int x,y;
-    char ch = 127;
-    //char ch = ' ';
+    //char ch = 127;
+    char ch = ' ';
     for(y=0; y<8; y++)
     {
        for(x=0; x<8; x++)
