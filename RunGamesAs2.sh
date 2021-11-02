@@ -6,7 +6,7 @@ javac MyProg.java
 
 Wins=0
 Losses=0
-Games=100
+Games=30
 
 #Run games through loop. then increment wins
 for ((i=1; i<=Games; i++))

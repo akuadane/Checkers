@@ -344,6 +344,7 @@ public class MyProg
 
 
     //using explicit Red/White scores easier to debug and to add in ratio heuristics. 
+    //working. not gonna touch. 
     double evalBoard(State currBoard){ 
         int y,x;
         double score=0.0;
@@ -377,6 +378,44 @@ public class MyProg
         }
         return score;
     }
+
+    // //ratio testing
+    // double evalBoard(State currBoard){ 
+    //     int y,x;
+    //     double score=0.0;
+    //     double redScore=0.0;
+    //     double whiteScore=0.0;
+    //     double pawnValue=1.0;
+    //     double kingValue=2.0;
+
+    //     for(y=0; y<8; y++) {
+    //         for(x=0; x<8; x++){
+    //           if(x%2 != y%2){
+    //                 if(KING(currBoard.board[y][x])){
+    //                     if(color(currBoard.board[y][x]) == 2)  // / equiv to color() == WHITE
+    //                         whiteScore+=kingValue;
+    //                     else 
+    //                         redScore+=kingValue;
+    //                 }
+    //                 else if(piece(currBoard.board[y][x])){
+    //                     if(color(currBoard.board[y][x]) == 2) 
+    //                         whiteScore+=pawnValue;
+    //                     else 
+    //                         redScore+=pawnValue;
+    //                 }
+    //            }
+    //         } 
+    //     }
+    //     if( me==1){
+    //         score = redScore / whiteScore;
+    //         //System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
+    //     }
+    //     else{
+    //         score = whiteScore / redScore;
+    //        // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
+    //     }
+    //     return score;
+    // }
 
 
 
