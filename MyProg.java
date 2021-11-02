@@ -596,21 +596,6 @@ public class MyProg
         System.err.println("Java wRead " + rval);
         return rval;
     }
-    public int countPieces(char[][] curBoard){
-        int pieces =0;
-        for(int y=0; y<8; y++) {
-            for(int x=0; x<8; x++){
-                if(x%2 != y%2){
-                    
-                    if(KING(curBoard[y][x]) | piece(curBoard[y][x])){
-                        pieces += 1;
-
-                    }
-                }
-            }
-        }
-        return pieces;
-    }
 
     public void play(String argv[]) throws Exception
     {
@@ -650,13 +635,8 @@ public class MyProg
         //explicitly handling first move of each case. 
        if (player1==1) 
        {
-            /* Find my move, update board, and write move to pipe */
-            // if(player1!=0){ 
-                FindBestMove(1);
-            // }
-            // else {
-            //      FindBestMove(2);
-            // }
+            FindBestMove(1);
+
             if(bestmove[0] != 0) { /* There is a legal move */
                 mlen = MoveLength(bestmove);
                 PerformMove(board,bestmove,mlen);
@@ -685,9 +665,9 @@ public class MyProg
                 mlen = MoveLength(bestmove);
                 PerformMove(board,bestmove,mlen);
                 buf = MoveToText(bestmove);
-                //totalPieces = countPieces(board);
+
                 System.err.println("Tanner is here");
-                System.err.println("total pieces:" + totalPieces);
+
             }
             else System.exit(1); /* No legal moves available, so I have lost */
 
@@ -709,16 +689,13 @@ public class MyProg
             /* Update the board to reflect opponents move */
             mlen = TextToMove(buf,move);
             PerformMove(board,move,mlen);
-            //totalPieces = countPieces(board);
-            //System.err.println("total pieces:" + totalPieces);
+
             /* Find my move, update board, and write move to pipe */
             if(player1!=0) FindBestMove(1); else FindBestMove(2);
             if(bestmove[0] != 0) { /* There is a legal move */
                 mlen = MoveLength(bestmove);
                 PerformMove(board,bestmove,mlen);
                 buf = MoveToText(bestmove);
-                //totalPieces = countPieces(board);
-                //System.err.println("total pieces:" + totalPieces);
             }
             else System.exit(1); /* No legal moves available, so I have lost */
 
