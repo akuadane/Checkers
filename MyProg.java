@@ -316,7 +316,7 @@ public class MyProg {
         return (jumpptr + moveptr);
     }
 
-    /* Employ your favorite search to find the best move. This code is an example */
+        /* Employ your favorite search to find the best move. This code is an example */
     /* of an alpha/beta search, except I have not provided the MinVal,MaxVal,EVAL */
     /*
      * functions. This example code shows you how to call the FindLegalMoves
@@ -324,68 +324,54 @@ public class MyProg {
      */
     /* and the PerformMove function */
     void FindBestMove(int player) {
+        int myBestMoveIndex;
+        
         long start = System.currentTimeMillis();
-        double SecPerMove = 2.8;
-        long end = (long) (start + SecPerMove * 1000);
+        long end = (long) (start + SecPerMove * 1000 * 0.9);
+
+
+        /* Set up the current state */
+
         State state = new State(); // , nextstate;
-        State nextState = new State();
+        state.player = player;
+        memcpy(state.board, board);
+        memset(bestmove, 0, 12);
 
-        Thread job = new Thread() {
-            @Override
-            public void run() {
-                int myBestMoveIndex; // ,alpha=-1000,beta=1000,minval[48];
-                double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
-                // State state = new State(); //, nextstate;
+        /* Find the legal moves for the current state */
+        FindLegalMoves(state);
+        myBestMoveIndex = random.nextInt(state.moveptr);
 
-                /* Set up the current state */
-                state.player = player;
-                memcpy(state.board, board);
-                memset(bestmove, 0, 12);
+        // for(int depth=1; depth<=50;depth++){
+            // System.err.println(" depth is : " + depth); 
+            int depth = 5;
+            double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
+            for (int x = 0; x < state.moveptr; x++) {
 
-                /* Find the legal moves for the current state */
-                FindLegalMoves(state);
-                myBestMoveIndex = random.nextInt(state.moveptr);
-                while (!Thread.interrupted()) {
-                    for (int x = 0; x < state.moveptr; x++) {
-                        // Set up the next state by copying the current state and then updating
-                        // the new state to reflect the new board after performing the move.
-                        double rVal;
-                        // State nextState= new State();
-                        nextState.player = player;
-                        memcpy(nextState.board, board);
-                        PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
+                // Set up the next state by copying the current state and then updating
+                // the new state to reflect the new board after performing the move.
+                double rVal;
+                State nextState = new State();
+                nextState.player = player;
+                memcpy(nextState.board, board);
+                PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
+                //System.err.println("examining move " + MoveToText(state.movelist[x]));System.err.flush();
+                rVal = MinVal(nextState, alpha, beta, depth, end);
 
-                        rVal = MinVal(nextState, alpha, beta, MaxDepth);
-
-                        if (rVal > alpha) {
-                            alpha = rVal;
-                            myBestMoveIndex = x;
-                        }
-
-                        // Call your search routine to determine the value of this move. Note:
-                        // if you choose to use alpha/beta search you will need to write the
-                        // MinVal and MaxVal functions, as well as your heuristic eval
-                        // function.
-                    }
-                    break;
+                if (rVal > alpha) {
+                    alpha = rVal;
+                    myBestMoveIndex = x;
 
                 }
-                memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+
+                // Call your search routine to determine the value of this move. Note:
+                // if you choose to use alpha/beta search you will need to write the
+                // MinVal and MaxVal functions, as well as your heuristic eval
+                // function.
 
             }
-        };
+        // }
+        memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
 
-        job.start();
-
-        while (job.isAlive() && System.currentTimeMillis() < end) {
-        }
-
-        job.interrupt();
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
-        job.stop();
     }
 
     // For now, until you write your search routine, we will just set the best move
@@ -399,31 +385,42 @@ public class MyProg {
         double score = 0.0;
         double redScore = 0.0;
         double whiteScore = 0.0;
+        double homerowValue = 1.0;
+        double pawnValue=1.0;
+        double kingValue=2.0;
         for (y = 0; y < 8; y++) {
             for (x = 0; x < 8; x++) {
                 if (x % 2 != y % 2) {
                     if (KING(currBoard.board[y][x])) {
                         if (color(currBoard.board[y][x]) == 2) // / equiv to color() == WHITE
-                            whiteScore += 2.0;
+                            whiteScore += kingValue;
                         else
-                            redScore += 2.0;
+                            redScore += kingValue;
                     } else if (piece(currBoard.board[y][x])) {
-                        if (color(currBoard.board[y][x]) == 2)
-                            whiteScore += 1.0;
-                        else
-                            redScore += 1.0;
+                        if (color(currBoard.board[y][x]) == 2){
+                            
+                            whiteScore += pawnValue;
+                            if(endgame==0 && y==7){
+                                whiteScore += homerowValue;
+                            }
+                        }
+                        else{
+                            redScore += pawnValue;
+
+                            if(endgame==0 && y==0){
+                                redScore += homerowValue;
+                            }
+                        }    
                     }
                 }
             }
         }
         if (me == 1) {
             score = redScore / whiteScore;
-            // System.err.println("I am red, player 1 with overall score: " + score + " and
-            // red score: " + redScore + " and white score " + whiteScore);
+            // System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         } else {
             score = whiteScore / redScore;
-            // System.err.println("I am white, player 2 with overall score: " + score + "
-            // and red score: " + redScore + " and white score " + whiteScore);
+            // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
         return score;
     }
@@ -468,14 +465,12 @@ public class MyProg {
     // }
 
 
-    double MinVal(State prevState, double alpha, double beta, int localMaxDepth) {
+    
+    double MinVal(State prevState, double alpha, double beta, int localMaxDepth, long end) {
         State state = new State();
         int x;
 
-        // System.err.println("Tanner local max depth inside a MinVal: " +
-        // localMaxDepth);
-        if (localMaxDepth <= 0) {
-
+        if (localMaxDepth <= 0 || (System.currentTimeMillis() > end)) {
             return evalBoard(prevState);
         }
 
@@ -489,7 +484,7 @@ public class MyProg {
             nextState.player = state.player;
             memcpy(nextState.board, state.board);
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
-            rval = MaxVal(nextState, alpha, beta, localMaxDepth - 1);
+            rval = MaxVal(nextState, alpha, beta, localMaxDepth - 1, end);
             if (rval < beta) {
                 beta = rval;
                 if (beta <= alpha)
@@ -500,11 +495,11 @@ public class MyProg {
         return beta;
     }
 
-    double MaxVal(State prevState, double alpha, double beta, int localMaxDepth) {
+    double MaxVal(State prevState, double alpha, double beta, int localMaxDepth, long end) {
         State state = new State();
         int x;
-        // System.err.println("depth inside MAXVal: " + localMaxDepth);
-        if (localMaxDepth <= 0) {
+        
+        if (localMaxDepth <= 0 || (System.currentTimeMillis() > end)) {
 
             return evalBoard(prevState);
         }
@@ -519,7 +514,7 @@ public class MyProg {
             nextState.player = state.player;
             memcpy(nextState.board, state.board);
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
-            rval = MinVal(nextState, alpha, beta, localMaxDepth - 1);
+            rval = MinVal(nextState, alpha, beta, localMaxDepth - 1, end);
             if (rval > alpha) {
                 alpha = rval;
                 if (alpha >= beta)
@@ -688,15 +683,34 @@ public class MyProg {
         return rval;
     }
 
-    public int countPieces(char[][] curBoard) {
+    // count red only, for debugging. 
+    public int countRedPieces(char[][] curBoard) {
         int pieces = 0;
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
                 if (x % 2 != y % 2) {
+                    if (color(curBoard[y][x]) == 1) { //
+                    
+                        if (KING(curBoard[y][x]) | piece(curBoard[y][x])) {
+                            pieces += 1;
+                        }
+                    }
+                }
+            }
+        }
+        return pieces;
+    }
 
-                    if (KING(curBoard[y][x]) | piece(curBoard[y][x])) {
-                        pieces += 1;
-
+    public int countWhitePieces(char[][] curBoard) {
+        int pieces = 0;
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                if (x % 2 != y % 2) {
+                    if (color(curBoard[y][x]) == 2) { //
+                    
+                        if (KING(curBoard[y][x]) | piece(curBoard[y][x])) {
+                            pieces += 1;
+                        }
                     }
                 }
             }
@@ -713,10 +727,12 @@ public class MyProg {
 
         /* Convert command line parameters */
         SecPerMove = (float) (Double.parseDouble(argv[0]));
-        MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 5;
-
+        // SecPerMove = 5;
+        System.err.println("Java Sec per move = " + SecPerMove);
+        //MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 7;
+        MaxDepth = 7;
         // System.err.println("Tanner MAx depth : " + MaxDepth);
-        System.err.println("Java maximum search depth = " + MaxDepth);
+        //System.err.println("Java maximum search depth = " + MaxDepth);
 
         /* Determine if I am player 1 (red) or player 2 (white) */
         // buf = br.readLine();
@@ -739,12 +755,9 @@ public class MyProg {
         // explicitly handling first move of each case.
         if (player1 == 1) {
             /* Find my move, update board, and write move to pipe */
-            // if(player1!=0){
+
             FindBestMove(1);
-            // }
-            // else {
-            // FindBestMove(2);
-            // }
+  
             if (bestmove[0] != 0) { /* There is a legal move */
                 mlen = MoveLength(bestmove);
                 PerformMove(board, bestmove, mlen);
@@ -772,9 +785,9 @@ public class MyProg {
                 mlen = MoveLength(bestmove);
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
-                // totalPieces = countPieces(board);
+                //totalPieces = countPieces(board);
                 System.err.println("Tanner is here");
-                System.err.println("total pieces:" + totalPieces);
+                //System.err.println("total pieces:" + totalPieces);
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
 
@@ -787,6 +800,12 @@ public class MyProg {
         for (;;) {
             /* Read the other player's move from the pipe */
             // buf=br.readLine();
+            double rTotalPieces = countRedPieces(board);
+            double wTotalPieces = countWhitePieces(board);
+            double points = rTotalPieces - wTotalPieces;
+            //System.err.println("======= board eval : " + points + "   <============"); System.err.flush();
+            
+            
             buf = myRead(br);
 
             memset(move, 0, 12);
@@ -794,7 +813,7 @@ public class MyProg {
             /* Update the board to reflect opponents move */
             mlen = TextToMove(buf, move);
             PerformMove(board, move, mlen);
-            // totalPieces = countPieces(board);
+             //totalPieces = countPieces(board);
             // System.err.println("total pieces:" + totalPieces);
             /* Find my move, update board, and write move to pipe */
             if (player1 != 0)
@@ -805,8 +824,15 @@ public class MyProg {
                 mlen = MoveLength(bestmove);
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
-                // totalPieces = countPieces(board);
-                // System.err.println("total pieces:" + totalPieces);
+
+                rTotalPieces = countRedPieces(board);
+                wTotalPieces = countWhitePieces(board);
+                points = rTotalPieces - wTotalPieces;
+                System.err.println("======= board eval : " + points + "   <============");
+               // System.err.println("total Red Pieces:" + redTotalPieces);
+               // System.err.println("total white Pieces:" + whiteTotalPieces);
+                
+
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
 
