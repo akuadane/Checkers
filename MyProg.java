@@ -329,7 +329,7 @@ public class MyProg {
         long start = System.currentTimeMillis();
         long end = (long) (start + SecPerMove * 1000 * 0.9);
 
-        double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
+        
         /* Set up the current state */
 
         State state = new State(); // , nextstate;
@@ -343,7 +343,7 @@ public class MyProg {
 
 
         for(int depth=MaxDepth; depth<=100;depth++){
-
+            double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
         
 
         for (int x = 0; x < state.moveptr; x++) {
@@ -357,7 +357,10 @@ public class MyProg {
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
 
             rVal = MinVal(nextState, alpha, beta, depth, end);
-
+            if(rVal==Double.MIN_VALUE){
+                memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+                return;
+            }
             if (rVal > alpha) {
                 alpha = rVal;
                 myBestMoveIndex = x;
@@ -459,7 +462,10 @@ public class MyProg {
         State state = new State();
         int x;
 
-        if (localMaxDepth <= 0 || (System.currentTimeMillis() > end)) {
+        if((System.currentTimeMillis() > end)){
+            return Double.MIN_VALUE;
+        }
+        if (localMaxDepth <= 0 ) {
 
             return evalBoard(prevState);
         }
@@ -489,7 +495,11 @@ public class MyProg {
         State state = new State();
         int x;
         
-        if (localMaxDepth <= 0 || (System.currentTimeMillis() > end)) {
+
+        if((System.currentTimeMillis() > end)){
+            return Double.MIN_VALUE;
+        }
+        if (localMaxDepth <= 0) {
 
             return evalBoard(prevState);
         }

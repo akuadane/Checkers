@@ -14,7 +14,7 @@ do
 	#pipe all output to temp file, and suppress terminal output.
 	#timeout 5 ./checkers computer "java MyProg" 5 &> test
 	#timeout 5 ./checkers foo computer 3 -MaxDepth 3 &> test
-	 ./checkers "java MyProg" foo 3 -MaxDepth 5 &> test
+	 ./checkers "java MyProg" computer 3 -MaxDepth 5 &> test
 	 
 
 	
