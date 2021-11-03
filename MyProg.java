@@ -341,6 +341,11 @@ public class MyProg {
         FindLegalMoves(state);
         myBestMoveIndex = random.nextInt(state.moveptr);
 
+
+        for(int depth=MaxDepth; depth<=100;depth++){
+
+        
+
         for (int x = 0; x < state.moveptr; x++) {
 
             // Set up the next state by copying the current state and then updating
@@ -351,7 +356,7 @@ public class MyProg {
             memcpy(nextState.board, board);
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
 
-            rVal = MinVal(nextState, alpha, beta, MaxDepth, end);
+            rVal = MinVal(nextState, alpha, beta, depth, end);
 
             if (rVal > alpha) {
                 alpha = rVal;
@@ -364,7 +369,7 @@ public class MyProg {
             // MinVal and MaxVal functions, as well as your heuristic eval
             // function.
 
-        }
+        }}
 
         memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
 
