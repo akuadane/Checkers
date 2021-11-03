@@ -33,7 +33,7 @@ public class MyProg {
     public static final int King = 0x60;
     public static final int Red = 0x00;
     public static final int White = 0x80;
-
+    static volatile int myBestMoveIndex;
     float SecPerMove;
     char[][] board = new char[8][8];
     char[] bestmove = new char[12];
@@ -333,7 +333,7 @@ public class MyProg {
         Thread job = new Thread() {
             @Override
             public void run() {
-                int myBestMoveIndex; // ,alpha=-1000,beta=1000,minval[48];
+              
                 double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
                 // State state = new State(); //, nextstate;
 
@@ -345,8 +345,10 @@ public class MyProg {
                 /* Find the legal moves for the current state */
                 FindLegalMoves(state);
                 myBestMoveIndex = random.nextInt(state.moveptr);
+             
                 while (!Thread.interrupted()) {
                     for (int x = 0; x < state.moveptr; x++) {
+                     
                         // Set up the next state by copying the current state and then updating
                         // the new state to reflect the new board after performing the move.
                         double rVal;
@@ -356,36 +358,48 @@ public class MyProg {
                         PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
 
                         rVal = MinVal(nextState, alpha, beta, MaxDepth);
-
+                      
                         if (rVal > alpha) {
                             alpha = rVal;
                             myBestMoveIndex = x;
+                           
                         }
 
                         // Call your search routine to determine the value of this move. Note:
                         // if you choose to use alpha/beta search you will need to write the
                         // MinVal and MaxVal functions, as well as your heuristic eval
                         // function.
+                      
                     }
                     break;
 
                 }
-                memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+               
+               // memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
 
             }
         };
 
         job.start();
-
-        while (job.isAlive() && System.currentTimeMillis() < end) {
+       
+        while (job.isAlive() && System.currentTimeMillis() < end-200) {
+            
         }
+       //System.err.println("To interrrupt thread===================="+(System.currentTimeMillis() < end-200));
+       
+       try {
+        Thread.sleep(10);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+       job.stop();
+      
+    
 
-        job.interrupt();
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
-        job.stop();
+      
+        memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+        // job.stop();
+        
     }
 
     // For now, until you write your search routine, we will just set the best move
@@ -809,7 +823,7 @@ public class MyProg {
                 // System.err.println("total pieces:" + totalPieces);
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
-
+           
             /* Write the move to the pipe */
             System.err.println("Java move: " + buf);
             System.out.println(buf);
