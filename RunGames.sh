@@ -5,7 +5,7 @@ javac MyProg.java
 
 Wins=0
 Losses=0
-Games=50
+Games=10
 
 #Run games through loop. then increment wins
 for ((i=1; i<=Games; i++))
@@ -14,7 +14,7 @@ do
 	#pipe all output to temp file, and suppress terminal output.
 	#timeout 5 ./checkers computer "java MyProg" 5 &> test
 	#timeout 5 ./checkers foo computer 3 -MaxDepth 3 &> test
-	 ./checkers "java MyProg" foo 3 -MaxDepth 5 &> test
+	./checkers "java MyProg" computer 2 -MaxDepth 5 &> test
 	 
 
 	
@@ -35,6 +35,6 @@ do
 done
 
 #output W/L ratio.
-echo "MyProg won " $Wins " and lost " $Losses " out of " $Games "  versus Computer"
+echo "MyProg won " $Wins " and lost " $Losses " out of " $Games "  versus computer"
 
 

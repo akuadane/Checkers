@@ -327,7 +327,7 @@ public class MyProg {
         int myBestMoveIndex;
         
         long start = System.currentTimeMillis();
-        long end = (long) (start + SecPerMove * 1000 * 0.9);
+        long end = (long) (start + SecPerMove * 1000 * 0.95);
 
 
         /* Set up the current state */
@@ -340,10 +340,12 @@ public class MyProg {
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
         myBestMoveIndex = random.nextInt(state.moveptr);
+        // int prevIndex = 0;
 
-        // for(int depth=1; depth<=50;depth++){
+        for(int depth=1; depth<=50;depth++){
+            // myBestMoveIndex=0;
             // System.err.println(" depth is : " + depth); 
-            int depth = 5;
+            
             double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
             for (int x = 0; x < state.moveptr; x++) {
 
@@ -357,19 +359,23 @@ public class MyProg {
                 //System.err.println("examining move " + MoveToText(state.movelist[x]));System.err.flush();
                 rVal = MinVal(nextState, alpha, beta, depth, end);
 
+                if (rVal == -1){
+
+                }
                 if (rVal > alpha) {
                     alpha = rVal;
                     myBestMoveIndex = x;
-
                 }
 
-                // Call your search routine to determine the value of this move. Note:
-                // if you choose to use alpha/beta search you will need to write the
-                // MinVal and MaxVal functions, as well as your heuristic eval
-                // function.
-
             }
-        // }
+
+        //    System.err.println("hit the bottom of depth = " + depth); 
+            // prevIndex = ;
+            // if (){
+            //     prevIndex = myBestMoveIndex;
+            // }
+            
+        }
         memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
 
     }
@@ -416,64 +422,30 @@ public class MyProg {
             }
         }
         if (me == 1) {
-            score = redScore / whiteScore;
+            score = redScore - whiteScore;
             // System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         } else {
-            score = whiteScore / redScore;
+            score = whiteScore - redScore;
             // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
         return score;
     }
 
 
-    // //ratio testing
-    // double evalBoard(State currBoard){ 
-    //     int y,x;
-    //     double score=0.0;
-    //     double redScore=0.0;
-    //     double whiteScore=0.0;
-    //     double pawnValue=1.0;
-    //     double kingValue=2.0;
-
-    //     for(y=0; y<8; y++) {
-    //         for(x=0; x<8; x++){
-    //           if(x%2 != y%2){
-    //                 if(KING(currBoard.board[y][x])){
-    //                     if(color(currBoard.board[y][x]) == 2)  // / equiv to color() == WHITE
-    //                         whiteScore+=kingValue;
-    //                     else 
-    //                         redScore+=kingValue;
-    //                 }
-    //                 else if(piece(currBoard.board[y][x])){
-    //                     if(color(currBoard.board[y][x]) == 2) 
-    //                         whiteScore+=pawnValue;
-    //                     else 
-    //                         redScore+=pawnValue;
-    //                 }
-    //            }
-    //         } 
-    //     }
-    //     if( me==1){
-    //         score = redScore / whiteScore;
-    //         //System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
-    //     }
-    //     else{
-    //         score = whiteScore / redScore;
-    //        // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
-    //     }
-    //     return score;
-    // }
 
 
     
     double MinVal(State prevState, double alpha, double beta, int localMaxDepth, long end) {
         State state = new State();
         int x;
-
-        if (localMaxDepth <= 0 || (System.currentTimeMillis() > end)) {
-            return evalBoard(prevState);
+        if (System.currentTimeMillis() > end){
+            return -1;
+        }else
+        {
+            if (localMaxDepth <= 0) {
+                return evalBoard(prevState);
+            }
         }
-
         state.player = (prevState.player == 1) ? 2 : 1;
         memcpy(state.board, prevState.board);
         FindLegalMoves(state);
