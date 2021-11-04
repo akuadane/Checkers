@@ -342,9 +342,9 @@ public class MyProg {
         myBestMoveIndex = random.nextInt(state.moveptr);
 
 
-        for(int depth=MaxDepth; depth<=100;depth++){
+        for(int depth=1; depth<=100;depth++){
             double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
-        
+            // System.err.println("depth is: " + depth);
 
         for (int x = 0; x < state.moveptr; x++) {
 
@@ -358,7 +358,7 @@ public class MyProg {
 
             rVal = MinVal(nextState, alpha, beta, depth, end);
             if((System.currentTimeMillis() > end)){
-                System.err.println("Run out of time!==========");
+                // System.err.println("Run out of time!==========");
                 memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
                 return;
             }
@@ -391,6 +391,7 @@ public class MyProg {
         double redScore = 0.0;
         double whiteScore = 0.0;
         double homerowValue = 0.2;
+
         double pawnValue=1.0;
         double kingValue=1.6;
         for (y = 0; y < 8; y++) {
@@ -421,10 +422,10 @@ public class MyProg {
             }
         }
         if (me == 1) {
-            score = redScore - whiteScore;
+            score = redScore / whiteScore;
             // System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         } else {
-            score = whiteScore - redScore;
+            score = whiteScore / redScore;
             // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
         return score;
@@ -613,7 +614,7 @@ public class MyProg {
     }
 
     public static void main(String argv[]) throws Exception {
-        System.err.println("AAAAA");
+        // System.err.println("AAAAA");
         if (argv.length >= 2)
             System.err.println("Argument:" + argv[1]);
         MyProg stupid = new MyProg();
@@ -699,7 +700,7 @@ public class MyProg {
         /* Convert command line parameters */
         SecPerMove = (float) (Double.parseDouble(argv[0]));
         // SecPerMove = 5;
-        System.err.println("Java Sec per move = " + SecPerMove);
+        // System.err.println("Java Sec per move = " + SecPerMove);
         //MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 7;
         MaxDepth = 7;
         // System.err.println("Tanner MAx depth : " + MaxDepth);
@@ -757,7 +758,7 @@ public class MyProg {
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
                 //totalPieces = countPieces(board);
-                System.err.println("Tanner is here");
+                // System.err.println("Tanner is here");
                 //System.err.println("total pieces:" + totalPieces);
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
@@ -799,7 +800,7 @@ public class MyProg {
                 rTotalPieces = countRedPieces(board);
                 wTotalPieces = countWhitePieces(board);
                 points = rTotalPieces - wTotalPieces;
-                System.err.println("======= board eval : " + points + "   <============");
+                // System.err.println("======= board eval : " + points + "   <============");
                // System.err.println("total Red Pieces:" + redTotalPieces);
                // System.err.println("total white Pieces:" + whiteTotalPieces);
                 
