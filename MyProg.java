@@ -340,42 +340,41 @@ public class MyProg {
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
         myBestMoveIndex = random.nextInt(state.moveptr);
-        // int prevIndex = 0;
 
-        for(int depth=1; depth<=50;depth++){
-            // myBestMoveIndex=0;
-            // System.err.println(" depth is : " + depth); 
-            
+
+        for(int depth=MaxDepth; depth<=100;depth++){
             double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
-            for (int x = 0; x < state.moveptr; x++) {
+        
 
-                // Set up the next state by copying the current state and then updating
-                // the new state to reflect the new board after performing the move.
-                double rVal;
-                State nextState = new State();
-                nextState.player = player;
-                memcpy(nextState.board, board);
-                PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
-                //System.err.println("examining move " + MoveToText(state.movelist[x]));System.err.flush();
-                rVal = MinVal(nextState, alpha, beta, depth, end);
+        for (int x = 0; x < state.moveptr; x++) {
 
-                if (rVal == -1){
+            // Set up the next state by copying the current state and then updating
+            // the new state to reflect the new board after performing the move.
+            double rVal;
+            State nextState = new State();
+            nextState.player = player;
+            memcpy(nextState.board, board);
+            PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
 
-                }
-                if (rVal > alpha) {
-                    alpha = rVal;
-                    myBestMoveIndex = x;
-                }
+            rVal = MinVal(nextState, alpha, beta, depth, end);
+            if((System.currentTimeMillis() > end)){
+                System.err.println("Run out of time!==========");
+                memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+                return;
+            }
+            if (rVal > alpha) {
+                alpha = rVal;
+                myBestMoveIndex = x;
 
             }
 
-        //    System.err.println("hit the bottom of depth = " + depth); 
-            // prevIndex = ;
-            // if (){
-            //     prevIndex = myBestMoveIndex;
-            // }
-            
-        }
+            // Call your search routine to determine the value of this move. Note:
+            // if you choose to use alpha/beta search you will need to write the
+            // MinVal and MaxVal functions, as well as your heuristic eval
+            // function.
+
+        }}
+
         memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
 
     }
