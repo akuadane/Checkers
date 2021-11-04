@@ -390,9 +390,9 @@ public class MyProg {
         double score = 0.0;
         double redScore = 0.0;
         double whiteScore = 0.0;
-        double homerowValue = 1.0;
+        double homerowValue = 0.2;
         double pawnValue=1.0;
-        double kingValue=2.0;
+        double kingValue=1.6;
         for (y = 0; y < 8; y++) {
             for (x = 0; x < 8; x++) {
                 if (x % 2 != y % 2) {
