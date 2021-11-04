@@ -357,7 +357,8 @@ public class MyProg {
             PerformMove(nextState.board, state.movelist[x], MoveLength(state.movelist[x]));
 
             rVal = MinVal(nextState, alpha, beta, depth, end);
-            if(rVal==Double.MIN_VALUE){
+            if((System.currentTimeMillis() > end)){
+                System.err.println("Run out of time!==========");
                 memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
                 return;
             }
