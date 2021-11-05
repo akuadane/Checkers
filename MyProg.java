@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.*;
-import java.text.DecimalFormat;
 
 class State {
     int player;
@@ -38,6 +37,7 @@ public class MyProg {
     float SecPerMove;
     char[][] board = new char[8][8];
     char[] bestmove = new char[12];
+    // char[] previousBestMove = new char[12];
     int me, cutoff, endgame;
     long NumNodes;
     int MaxDepth;
@@ -50,16 +50,9 @@ public class MyProg {
     int moveptr = 0;
     int movelist[][] = new int[48][12];
 
-    int totalPieces = 24;
-
-    
-
     Random random = new Random();
-
     int moveCount = 0;
     double homerowValue = 1.0;
-
-    DecimalFormat df = new DecimalFormat("0.00");
 
     public int number(char x) {
         return ((x) & 0x1f);
@@ -336,8 +329,6 @@ public class MyProg {
         
         long start = System.currentTimeMillis();
         long end = (long) (start + SecPerMove * 1000 * 0.95);
-
-
         /* Set up the current state */
 
         State state = new State(); // , nextstate;
@@ -348,11 +339,10 @@ public class MyProg {
         /* Find the legal moves for the current state */
         FindLegalMoves(state);
         myBestMoveIndex = random.nextInt(state.moveptr);
-        
-
-        for(int depth=1; depth<=1000;depth++){
+        int previousDepthBestIndex =0;
+        for(int depth=1; depth<=100;depth++){
             double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
-            myBestMoveIndex = 0;
+
             for (int x = 0; x < state.moveptr; x++) {
                 // Set up the next state by copying the current state and then updating
                 // the new state to reflect the new board after performing the move.
@@ -366,8 +356,7 @@ public class MyProg {
                 if((System.currentTimeMillis() > end)){
                     // System.err.println("==== TANNER Ran out of time!==========");
                     // System.err.println("at depth : " + depth);
-                    // System.err.println("My best move ran out of time: " + MoveToText(state.movelist[myBestMoveIndex]));
-                    // memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+                    // memcpy(bestmove, state.movelist[previousDepthBestIndex], MoveLength(state.movelist[previousDepthBestIndex]));
                     return;
                 }
                 if (rVal > alpha) {
@@ -375,12 +364,14 @@ public class MyProg {
                     myBestMoveIndex = x;
                 }
             }
-            memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
-            // System.err.println("at bottom depth: " + depth + " my best move is: " + MoveToText(state.movelist[myBestMoveIndex]));
+            previousDepthBestIndex = myBestMoveIndex; // if the depth finishes, store the previous best move. 
+            memset(bestmove, 0, 12);
+            memcpy(bestmove, state.movelist[previousDepthBestIndex], MoveLength(state.movelist[previousDepthBestIndex]));
+
+            // System.err.println("at bottom depth: " + depth + " my best move is: " + MoveToText(state.movelist[previousDepthBestIndex]));
         }
-        // below code never executes. will return instead at timeout
-        // System.err.println("8888888888888888888888 TANNER 88888888888888888888"); 
-        memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+        // System.err.println("....... does this ever print? ....... ");
+        // memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
     }
 
     // For now, until you write your search routine, we will just set the best move
@@ -394,12 +385,9 @@ public class MyProg {
         double score = 0.0;
         double redScore = 0.0;
         double whiteScore = 0.0;
-        
-        double pawnValue=1.0;
-        double kingValue=2.0;
-        double edgeValue=0.25;
-        
 
+        double pawnValue=1.0;
+        double kingValue=1.6;
         for (y = 0; y < 8; y++) {
             for (x = 0; x < 8; x++) {
                 if (x % 2 != y % 2) {
@@ -412,27 +400,15 @@ public class MyProg {
                         if (color(currBoard.board[y][x]) == 2){
                             
                             whiteScore += pawnValue;
-                            if(y==7){ // homerow for red, pieces only
+                            if(y==7){
                                 whiteScore += homerowValue;
-                                whiteScore = Double.parseDouble(df.format(whiteScore));
-                            }
-
-                            if(x==0 || x==7){ // on edge, add edgeValue
-                                whiteScore += edgeValue;
-                                whiteScore = Double.parseDouble(df.format(whiteScore));
                             }
                         }
                         else{
                             redScore += pawnValue;
 
-                            if(y==0){ // homerow for white
+                            if( y==0){
                                 redScore += homerowValue;
-                                redScore = Double.parseDouble(df.format(redScore));
-                            }
-
-                            if(x==0 || x==7){ // on edge, add edgeValue
-                                redScore += edgeValue;
-                                redScore = Double.parseDouble(df.format(redScore));
                             }
                         }    
                     }
@@ -443,18 +419,14 @@ public class MyProg {
             if (whiteScore==0){
                 score = 100;
             }else{
-                score = redScore / whiteScore;
-                score = Double.parseDouble(df.format(score));
+            score = redScore / whiteScore;
             }
-            // if(endgame == 1){
-                // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
-            // }
+            // System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         } else {
             if (redScore==0){
                 score = 100;
             }else{
-                score = whiteScore / redScore;
-                score = Double.parseDouble(df.format(score));
+            score = whiteScore / redScore;
             }
             // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
@@ -729,12 +701,7 @@ public class MyProg {
 
         /* Convert command line parameters */
         SecPerMove = (float) (Double.parseDouble(argv[0]));
-        // SecPerMove = 20;
-        // System.err.println("Java Sec per move = " + SecPerMove);
-        //MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 7;
-        // MaxDepth = 7;
-        // System.err.println("Tanner MAx depth : " + MaxDepth);
-        //System.err.println("Java maximum search depth = " + MaxDepth);
+
 
         /* Determine if I am player 1 (red) or player 2 (white) */
         // buf = br.readLine();
@@ -787,6 +754,7 @@ public class MyProg {
                 mlen = MoveLength(bestmove);
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
+                // System.err.println("Tanner is here");
 
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
@@ -797,7 +765,11 @@ public class MyProg {
             System.out.println(buf);
         }
         moveCount = 1;
-        for (;;) {          
+        for (;;) {
+            /* Read the other player's move from the pipe */
+            // buf=br.readLine();
+
+            
             
             buf = myRead(br);
 
@@ -806,8 +778,7 @@ public class MyProg {
             /* Update the board to reflect opponents move */
             mlen = TextToMove(buf, move);
             PerformMove(board, move, mlen);
-             //totalPieces = countPieces(board);
-            // System.err.println("total pieces:" + totalPieces);
+
             /* Find my move, update board, and write move to pipe */
             if (player1 != 0)
                 FindBestMove(1);
@@ -817,25 +788,26 @@ public class MyProg {
                 mlen = MoveLength(bestmove);
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
+
+                
+
                 moveCount+=1;
                 // System.err.println(" ------ Move count: " + moveCount + " -----------");
                 // System.err.println("is ? ? endgame: " + endgame);
-                if(moveCount > 10 ){
+                if(moveCount > 15 ){
                     endgame=1;
                                         
                     // incrementally abandon homerow heuristic into lategame. 
                     // Motivate player to advance pieces off homerow in end game
-                    if(homerowValue>0){
+                    if(homerowValue>=0.1){
                         homerowValue-=0.1; 
-                        homerowValue = Double.parseDouble(df.format(homerowValue));
                         
+                    }else{
+                        homerowValue=0;
                     }
                     // System.err.println(" homerow value is : " + homerowValue);
                     
                 }
-
-                // double points = evalBoard(board);
-                // System.err.println("======= board eval : " + points + "   <============"); System.err.flush();
 
             } else
                 System.exit(1); /* No legal moves available, so I have lost */
