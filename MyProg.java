@@ -350,11 +350,10 @@ public class MyProg {
         myBestMoveIndex = random.nextInt(state.moveptr);
         
 
-        for(int depth=1; depth<=100;depth++){
+        for(int depth=1; depth<=1000;depth++){
             double alpha = Double.MIN_VALUE, beta = Double.MAX_VALUE;
-
+            myBestMoveIndex = 0;
             for (int x = 0; x < state.moveptr; x++) {
-
                 // Set up the next state by copying the current state and then updating
                 // the new state to reflect the new board after performing the move.
                 double rVal;
@@ -365,27 +364,22 @@ public class MyProg {
 
                 rVal = MinVal(nextState, alpha, beta, depth, end);
                 if((System.currentTimeMillis() > end)){
-                    
-
                     System.err.println("==== TANNER Ran out of time!==========");
                     System.err.println("at depth : " + depth);
-                    System.err.println("My best move ran out of time: " + MoveToText(state.movelist[myBestMoveIndex]));
-                    memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
+                    // System.err.println("My best move ran out of time: " + MoveToText(state.movelist[myBestMoveIndex]));
+                    // memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
                     return;
                 }
                 if (rVal > alpha) {
                     alpha = rVal;
                     myBestMoveIndex = x;
-
                 }
             }
-            // System.err.println("bottom depth is: " + depth);
+            memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
             System.err.println("at bottom depth: " + depth + " my best move is: " + MoveToText(state.movelist[myBestMoveIndex]));
-
         }
-
+        System.err.println("8888888888888888888888 TANNER 88888888888888888888"); // never executes. will return at timeout
         memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
-
     }
 
     // For now, until you write your search routine, we will just set the best move
@@ -402,6 +396,7 @@ public class MyProg {
         
         double pawnValue=1.0;
         double kingValue=2.0;
+        double edgeValue=0.25;
         
 
         for (y = 0; y < 8; y++) {
@@ -419,7 +414,11 @@ public class MyProg {
                             if(y==7){ // homerow for red, pieces only
                                 whiteScore += homerowValue;
                                 whiteScore = Double.parseDouble(df.format(whiteScore));
-                                
+                            }
+
+                            if(x==0 || x==7){ // on edge, add edgeValue
+                                whiteScore += edgeValue;
+                                whiteScore = Double.parseDouble(df.format(whiteScore));
                             }
                         }
                         else{
@@ -429,21 +428,33 @@ public class MyProg {
                                 redScore += homerowValue;
                                 redScore = Double.parseDouble(df.format(redScore));
                             }
+
+                            if(x==0 || x==7){ // on edge, add edgeValue
+                                redScore += edgeValue;
+                                redScore = Double.parseDouble(df.format(redScore));
+                            }
                         }    
                     }
                 }
             }
         }
         if (me == 1) {
-            score = redScore / whiteScore;
-            score = Double.parseDouble(df.format(score));
-            if(endgame==1){
-                
-                System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
+            if (whiteScore==0){
+                score = 100;
+            }else{
+                score = redScore / whiteScore;
+                score = Double.parseDouble(df.format(score));
             }
+            // if(endgame == 1){
+                // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
+            // }
         } else {
-            score = whiteScore / redScore;
-            score = Double.parseDouble(df.format(score));
+            if (redScore==0){
+                score = 100;
+            }else{
+                score = whiteScore / redScore;
+                score = Double.parseDouble(df.format(score));
+            }
             // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
         return score;
@@ -720,7 +731,7 @@ public class MyProg {
         // SecPerMove = 20;
         // System.err.println("Java Sec per move = " + SecPerMove);
         //MaxDepth = (argv.length == 2) ? Integer.parseInt(argv[1]) : 7;
-        MaxDepth = 7;
+        // MaxDepth = 7;
         // System.err.println("Tanner MAx depth : " + MaxDepth);
         //System.err.println("Java maximum search depth = " + MaxDepth);
 
@@ -807,11 +818,11 @@ public class MyProg {
                 buf = MoveToText(bestmove);
                 moveCount+=1;
                 System.err.println(" ------ Move count: " + moveCount + " -----------");
-                System.err.println("is ? ? endgame: " + endgame);
-                if(moveCount > 15 ){
+                // System.err.println("is ? ? endgame: " + endgame);
+                if(moveCount > 10 ){
                     endgame=1;
                                         
-                    // slowly abandon homerow heuristic into lategame. 
+                    // incrementally abandon homerow heuristic into lategame. 
                     // Motivate player to advance pieces off homerow in end game
                     if(homerowValue>0){
                         homerowValue-=0.1; 
