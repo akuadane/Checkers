@@ -364,8 +364,8 @@ public class MyProg {
 
                 rVal = MinVal(nextState, alpha, beta, depth, end);
                 if((System.currentTimeMillis() > end)){
-                    System.err.println("==== TANNER Ran out of time!==========");
-                    System.err.println("at depth : " + depth);
+                    // System.err.println("==== TANNER Ran out of time!==========");
+                    // System.err.println("at depth : " + depth);
                     // System.err.println("My best move ran out of time: " + MoveToText(state.movelist[myBestMoveIndex]));
                     // memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
                     return;
@@ -376,9 +376,10 @@ public class MyProg {
                 }
             }
             memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
-            System.err.println("at bottom depth: " + depth + " my best move is: " + MoveToText(state.movelist[myBestMoveIndex]));
+            // System.err.println("at bottom depth: " + depth + " my best move is: " + MoveToText(state.movelist[myBestMoveIndex]));
         }
-        System.err.println("8888888888888888888888 TANNER 88888888888888888888"); // never executes. will return at timeout
+        // below code never executes. will return instead at timeout
+        // System.err.println("8888888888888888888888 TANNER 88888888888888888888"); 
         memcpy(bestmove, state.movelist[myBestMoveIndex], MoveLength(state.movelist[myBestMoveIndex]));
     }
 
@@ -817,7 +818,7 @@ public class MyProg {
                 PerformMove(board, bestmove, mlen);
                 buf = MoveToText(bestmove);
                 moveCount+=1;
-                System.err.println(" ------ Move count: " + moveCount + " -----------");
+                // System.err.println(" ------ Move count: " + moveCount + " -----------");
                 // System.err.println("is ? ? endgame: " + endgame);
                 if(moveCount > 10 ){
                     endgame=1;
@@ -829,7 +830,7 @@ public class MyProg {
                         homerowValue = Double.parseDouble(df.format(homerowValue));
                         
                     }
-                    System.err.println(" homerow value is : " + homerowValue);
+                    // System.err.println(" homerow value is : " + homerowValue);
                     
                 }
 
