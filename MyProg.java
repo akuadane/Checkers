@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+import java.text.DecimalFormat;
 
 class State {
     int player;
@@ -58,6 +59,7 @@ public class MyProg {
     int moveCount = 0;
     double homerowValue = 1.0;
 
+    DecimalFormat df = new DecimalFormat("0.00");
 
     public int number(char x) {
         return ((x) & 0x1f);
@@ -400,6 +402,7 @@ public class MyProg {
         
         double pawnValue=1.0;
         double kingValue=2.0;
+        
 
         for (y = 0; y < 8; y++) {
             for (x = 0; x < 8; x++) {
@@ -415,6 +418,8 @@ public class MyProg {
                             whiteScore += pawnValue;
                             if(y==7){ // homerow for red, pieces only
                                 whiteScore += homerowValue;
+                                whiteScore = Double.parseDouble(df.format(whiteScore));
+                                
                             }
                         }
                         else{
@@ -422,6 +427,7 @@ public class MyProg {
 
                             if(y==0){ // homerow for white
                                 redScore += homerowValue;
+                                redScore = Double.parseDouble(df.format(redScore));
                             }
                         }    
                     }
@@ -429,13 +435,15 @@ public class MyProg {
             }
         }
         if (me == 1) {
-            score = redScore - whiteScore;
+            score = redScore / whiteScore;
+            score = Double.parseDouble(df.format(score));
             if(endgame==1){
                 
-                // System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
+                System.err.println("I am red, player 1 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
             }
         } else {
-            score = whiteScore - redScore;
+            score = whiteScore / redScore;
+            score = Double.parseDouble(df.format(score));
             // System.err.println("I am white, player 2 with overall score: " + score + " and red score: " + redScore + " and white score " + whiteScore);
         }
         return score;
@@ -806,7 +814,9 @@ public class MyProg {
                     // slowly abandon homerow heuristic into lategame. 
                     // Motivate player to advance pieces off homerow in end game
                     if(homerowValue>0){
-                        homerowValue-=0.05; 
+                        homerowValue-=0.1; 
+                        homerowValue = Double.parseDouble(df.format(homerowValue));
+                        
                     }
                     System.err.println(" homerow value is : " + homerowValue);
                     
